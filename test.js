@@ -21,6 +21,7 @@ const testUserImgUrl = `https://preview.exokit.org/[https://app.webaverse.com/as
   console.log('got result', result);
   
   const canvas = document.getElementById('canvas');
+  console.log('got width', result);
   canvas.width = result.width;
   canvas.height = result.height;
   canvas.style.cssText = `\
@@ -28,9 +29,7 @@ const testUserImgUrl = `https://preview.exokit.org/[https://app.webaverse.com/as
     width: ${result.height / window.devicePixelRatio}px;
   `;
   const ctx = canvas.getContext('2d');
-  const imageData = ctx.createImageData(result.width, result.height);
-  imageData.data.set(result.data);
-  ctx.putImageData(imageData, 0, 0);
+  ctx.drawImage(result, 0, 0);
   
   // console.log('render 2');
 })();

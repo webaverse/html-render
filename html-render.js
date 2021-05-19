@@ -359,10 +359,8 @@ onCancel(() => {
     console.timeEnd('render 5');
     
     console.time('render 6');
-    result = _imgToImageData(img);
+    result = await createImageBitmap(img);
     console.timeEnd('render 6');
-    // console.log('got result', result);
-
   } catch (err) {
     error = err.stack;
   }
@@ -428,7 +426,7 @@ const _handleMessage = async data => {
         if (localCurrentPromise === currentPromise) {
           const {error, result} = o;
           if (error || result) {
-            port.postMessage({error, result}, [ArrayBuffer.isView(result.data) ? result.data.buffer : result.data]);
+            port.postMessage({error, result}, [result]);
           }
 
           currentPromise = null;
