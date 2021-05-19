@@ -5,7 +5,7 @@ import {uint8ArrayToArrayBuffer} from './utils.js';
 const width = 600;
 const svgMimeType = 'image/svg+xml';
 const testImgUrl = 'https://127.0.0.1:3001/assets/popup3.svg'/*'https://app.webaverse.com/assets/popup3.svg'*/;
-const testUserImgUrl = `https://preview.exokit.org/[https://app.webaverse.com/assets/type/robot.glb]/preview.png?nocache=1`;
+const testUserImgUrl = `https://preview.exokit.org/[https://app.webaverse.com/assets/type/robot.glb]/preview.png?width=128&height=128`;
 
 const domParser = new DOMParser();
 const xmlSerializer = new XMLSerializer();
@@ -40,10 +40,14 @@ const _imgToImageData = img => {
   return imageData;
 };
 const _getImageDataString = async u => {
+  console.time('lol 1');
   const res = await fetch(u);
   const arrayBuffer = await res.arrayBuffer();
   const uint8Array = new Uint8Array(arrayBuffer);
+  console.timeEnd('lol 1');
+  console.time('lol 2');
   const s = `data:image/png;base64,` + uint8ArrayToArrayBuffer(uint8Array);
+  console.timeEnd('lol 2');
   return s;
 };
 
@@ -58,24 +62,45 @@ const _getImageDataString = async u => {
 
   const result = await (async () => {
     console.time('render 1');
-    const {s, doc} = await (async () => {
-      const res = await fetch(testImgUrl);
-      const s = await res.text();
-      const doc = domParser.parseFromString(s, svgMimeType);
-      return {s, doc};
+    const {
+      s,
+      doc,
+      creatorImageData,
+      ownerImageData,
+    } = await (async () => {
+      const [
+        {
+          s,
+          doc,
+        },
+        creatorImageData,
+      ] = await Promise.all([
+        (async () => {
+          const res = await fetch(testImgUrl);
+          const s = await res.text();
+          const doc = domParser.parseFromString(s, svgMimeType);
+          return {s, doc};
+        })(),
+        (async () => {
+          const creatorImageData = await _getImageDataString(testUserImgUrl);
+          return creatorImageData;
+        })(),
+      ]);
+      const ownerImageData = creatorImageData;
+      return {
+        s,
+        doc,
+        creatorImageData,
+        ownerImageData,
+      };
     })();
     console.timeEnd('render 1');
     
     console.time('render 2');
     const creatorImageEl = doc.querySelector('#creator-image');
-    const creatorImageData = await _getImageDataString(testUserImgUrl);
-    // const oldUrl = creatorImageEl.getAttribute('xlink:href');
     creatorImageEl.setAttribute('xlink:href', creatorImageData);
-    // console.log('change urls', [oldUrl, ownerImageData]);
     
     const ownerImageEl = doc.querySelector('#owner-image')
-    const ownerImageData = await _getImageDataString(testUserImgUrl);
-    // const oldUrl = creatorImageEl.getAttribute('xlink:href');
     ownerImageEl.setAttribute('xlink:href', ownerImageData);
     console.timeEnd('render 2');
     
