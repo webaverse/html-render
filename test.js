@@ -38,6 +38,13 @@ const _imgToImageData = img => {
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   return imageData;
 };
+const _getImageDataString = async u => {
+  const res = await fetch(u);
+  const arrayBuffer = await res.arrayBuffer();
+  const uint8Array = new Uint8Array(arrayBuffer);
+  const s = `data:image/png;base64,` + uint8ArrayToArrayBuffer(uint8Array);
+  return s;
+};
 
 (async () => {
   console.log('create renderer');
@@ -57,23 +64,15 @@ const _imgToImageData = img => {
     window.doc = doc;
     
     const creatorImageEl = doc.querySelector('#creator-image');
-    // creatorImageEl.parentNode.removeChild(creatorImageEl);
-    
-    const ownerImageData = await (async () => {
-      const res = await fetch(testUserImgUrl);
-      const arrayBuffer = await res.arrayBuffer();
-      const uint8Array = new Uint8Array(arrayBuffer);
-      const s = `data:image/png;base64,` + uint8ArrayToArrayBuffer(uint8Array);
-      return s;
-    })();
-    const oldUrl = creatorImageEl.getAttribute('xlink:href');
-    creatorImageEl.setAttribute('xlink:href', ownerImageData);
-    
+    const creatorImageData = await _getImageDataString(testUserImgUrl);
+    // const oldUrl = creatorImageEl.getAttribute('xlink:href');
+    creatorImageEl.setAttribute('xlink:href', creatorImageData);
     // console.log('change urls', [oldUrl, ownerImageData]);
     
-    const ownerImageEl = doc.querySelector('#creator-image')
-    // console.log('got els', creatorImageEl, ownerImageEl);
-    // XXX finish this
+    const ownerImageEl = doc.querySelector('#owner-image')
+    const ownerImageData = await _getImageDataString(testUserImgUrl);
+    // const oldUrl = creatorImageEl.getAttribute('xlink:href');
+    ownerImageEl.setAttribute('xlink:href', ownerImageData);
     
     const s2 = xmlSerializer.serializeToString(doc);
     const b = new Blob([
