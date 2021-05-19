@@ -29,25 +29,20 @@ class HtmlRenderer {
   async waitForLoad() {
     return await this.loadPromise;
   }
-  render(htmlString) {
+  async render(htmlString) {
     const {contentWindow} = this.iframe;
     
     const messageChannel = new MessageChannel();
-    messageChannel.port2.addEventListener('message', e => {
-      console.log('got result', e.data.error, e.data.result);
-      const {error, result} = e.data;
-      
-      if (!error) {
-        const canvas = document.getElementById('canvas');
-        canvas.width = result.width;
-        canvas.height = result.height;
-        const ctx = canvas.getContext('2d');
-        const imageData = ctx.createImageData(result.width, result.height);
-        imageData.data.set(result.data);
-        ctx.putImageData(imageData, 0, 0);
-      } else {
-        throw new Error(error);
-      }
+    const p = new Promise((accept, reject) => {
+      messageChannel.port2.addEventListener('message', e => {
+        console.log('got result', e.data.error, e.data.result);
+        const {error, result} = e.data;
+        if (!error) {
+          accept(result);
+        } else {
+          reject(error);
+        }
+      });
     });
     messageChannel.port2.start();
     
@@ -73,6 +68,9 @@ class HtmlRenderer {
       }, '*', [port]);
       // console.log('post message 2');
     }
+    
+    const result = await p;
+    return result;
   }
 }
 export default HtmlRenderer;
