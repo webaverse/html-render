@@ -1,4 +1,5 @@
 import HtmlRenderer from './html-render-api.js';
+import {getDefaultStyles} from './default-styler.js';
 import {uint8ArrayToArrayBuffer} from './utils.js';
 
 const width = 600;
@@ -74,7 +75,11 @@ const _getImageDataString = async u => {
     // const oldUrl = creatorImageEl.getAttribute('xlink:href');
     ownerImageEl.setAttribute('xlink:href', ownerImageData);
     
-    const s2 = xmlSerializer.serializeToString(doc);
+    let s2 = xmlSerializer.serializeToString(doc);
+    
+    const stylePrefix = getDefaultStyles();
+    s2 = s2.replace(/(<style)/, stylePrefix + '$1');
+    
     const b = new Blob([
       s2,
     ], {
