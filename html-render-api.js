@@ -72,5 +72,51 @@ class HtmlRenderer {
     const result = await p;
     return result;
   }
+  async renderPopup({
+    // width,
+    // height,
+    imgUrl,
+    minterAvatarUrl,
+    ownerAvatarUrl,
+    transparent,
+  }) {
+    const {contentWindow} = this.iframe;
+    
+    const messageChannel = new MessageChannel();
+    const p = new Promise((accept, reject) => {
+      messageChannel.port2.addEventListener('message', e => {
+        console.log('got result', e.data.error, e.data.result);
+        const {error, result} = e.data;
+        if (!error) {
+          accept(result);
+        } else {
+          reject(error);
+        }
+      });
+    });
+    messageChannel.port2.start();
+    
+    {
+      const id = ++this.ids;
+      // const width = canvas.width;
+      // const height = canvas.height;
+      const port = messageChannel.port1;
+      // console.log('post message 1');
+      contentWindow.postMessage({
+        method: 'renderPopup',
+        id,
+        imgUrl,
+        minterAvatarUrl,
+        ownerAvatarUrl,
+        // width,
+        // height,
+        transparent,
+        port,
+      }, '*', [port]);
+    }
+    
+    const result = await p;
+    return result;
+  }
 }
 export default HtmlRenderer;

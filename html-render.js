@@ -2,6 +2,9 @@ import Mustache from './mustache.js';
 import {PCancelable} from './p-cancelable.js';
 import lruCache from './lru-cache.js';
 import {waitForLoad, getDefaultStyles} from './default-styler.js';
+import {uint8ArrayToArrayBuffer} from './utils.js';
+
+const svgMimeType = 'image/svg+xml';
 
 /* const _getProxyUrl = src => {
   const parsedUrl = new URL(src);
@@ -17,6 +20,50 @@ const ctx = canvas.getContext('2d');
 // ctx.fillRect(0, 0, canvas.width, canvas.height);
 // ctx.translate(0, canvas.height);
 // ctx.scale(1, -1);
+
+const domParser = new DOMParser();
+const xmlSerializer = new XMLSerializer();
+const textEncoder = new TextEncoder();
+
+const _loadImage = b => new Promise((accept, reject) => {
+  const _cleanup = () => {
+    URL.revokeObjectURL(u);
+  };
+  
+  const u = URL.createObjectURL(b);
+  const img = new Image();
+  img.crossOrigin = 'Anonymous';
+  img.src = u;
+  img.onload = () => {
+    accept(img);
+    _cleanup();
+  };
+  img.onerror = err => {
+    reject(err);
+    _cleanup();
+  };
+});
+const convertCanvas = document.createElement('canvas');
+const _imgToImageData = img => {
+  // console.log('got image spec', img.width, img.height, img.naturalWidth, img.naturalHeight);
+  convertCanvas.width = img.naturalWidth;
+  convertCanvas.height = img.naturalHeight;
+  const ctx = convertCanvas.getContext('2d');
+  ctx.drawImage(img, 0, 0);
+  const imageData = ctx.getImageData(0, 0, convertCanvas.width, convertCanvas.height);
+  return imageData;
+};
+const _getImageDataString = async u => {
+  // console.time('lol 1 ' + u);
+  const res = await fetch(u);
+  const arrayBuffer = await res.arrayBuffer();
+  const uint8Array = new Uint8Array(arrayBuffer);
+  // console.timeEnd('lol 1 ' + u);
+  // console.time('lol 2 ' + u);
+  const s = `data:image/png;base64,` + uint8ArrayToArrayBuffer(uint8Array);
+  // console.timeEnd('lol 2 ' + u);
+  return s;
+};
 
 const imgCache = new lruCache({
   max: 50,
@@ -237,6 +284,91 @@ onCancel(() => {
 })()
   .then(accept, reject);
 });
+window.renderPopup = (imgUrl, minterAvatarUrl, ownerAvatarUrl) => new PCancelable((accept, reject, onCancel) => {
+let cancelled = false;
+onCancel(() => {
+  cancelled = true;
+});
+(async () => {
+  await waitForLoad();
+  if (cancelled) return;
+
+  let error, result;
+  try {    
+    console.time('render');
+
+    const {
+      s,
+      doc,
+      minterImageData,
+      ownerImageData,
+    } = await (async () => {
+      const [
+        {
+          s,
+          doc,
+        },
+        minterImageData,
+        ownerImageData,
+      ] = await Promise.all([
+        (async () => {
+          const res = await fetch(imgUrl);
+          const s = await res.text();
+          const doc = domParser.parseFromString(s, svgMimeType);
+          return {s, doc};
+        })(),
+        _getImageDataString(minterAvatarUrl),
+        _getImageDataString(ownerAvatarUrl),
+      ]);
+      return {
+        s,
+        doc,
+        minterImageData,
+        ownerImageData,
+      };
+    })();
+    console.timeEnd('render 1');
+    
+    console.time('render 2');
+    const creatorImageEl = doc.querySelector('#creator-image');
+    creatorImageEl.setAttribute('xlink:href', minterImageData);
+    
+    const ownerImageEl = doc.querySelector('#owner-image')
+    ownerImageEl.setAttribute('xlink:href', ownerImageData);
+    console.timeEnd('render 2');
+    
+    console.time('render 3');
+    let s2 = xmlSerializer.serializeToString(doc);
+    console.timeEnd('render 3');
+    
+    console.time('render 4');
+    const stylePrefix = getDefaultStyles();
+    s2 = s2.replace(/(<style)/, stylePrefix + '$1');
+    console.timeEnd('render 4');
+    
+    console.time('render 5');
+    const b = new Blob([
+      s2,
+    ], {
+      type: svgMimeType,
+    });
+    // console.log('load image 1', b);
+    const img = await _loadImage(b);
+    console.timeEnd('render 5');
+    
+    console.time('render 6');
+    result = _imgToImageData(img);
+    console.timeEnd('render 6');
+    // console.log('got result', result);
+
+  } catch (err) {
+    error = err.stack;
+  }
+
+  return {error, result};
+})()
+  .then(accept, reject);
+});
 
 let currentPromise = null;
 const queue = [];
@@ -281,6 +413,29 @@ const _handleMessage = async data => {
         if (index !== -1) {
           queue.splice(index, 1);
         }
+      }
+      break;
+    }
+    case 'renderPopup': {
+      if (!currentPromise) {
+        const {id, imgUrl, minterAvatarUrl, ownerAvatarUrl, transaprent, port} = data;
+        
+        const localCurrentPromise = currentPromise = window.renderPopup(imgUrl, minterAvatarUrl, ownerAvatarUrl);
+        localCurrentPromise.id = id;
+        const o = await localCurrentPromise;
+        if (localCurrentPromise === currentPromise) {
+          const {error, result} = o;
+          if (error || result) {
+            port.postMessage({error, result}, [ArrayBuffer.isView(result.data) ? result.data.buffer : result.data]);
+          }
+
+          currentPromise = null;
+          if (queue.length > 0) {
+            _handleMessage(queue.shift());
+          }
+        }
+      } else {
+        queue.push(data);
       }
       break;
     }
