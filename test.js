@@ -29,14 +29,14 @@ const _loadImage = b => new Promise((accept, reject) => {
     _cleanup();
   };
 });
+const convertCanvas = document.createElement('canvas');
 const _imgToImageData = img => {
-  const canvas = document.createElement('canvas');
-  console.log('got image spec', img.width, img.height, img.naturalWidth, img.naturalHeight);
-  canvas.width = img.naturalWidth;
-  canvas.height = img.naturalHeight;
-  const ctx = canvas.getContext('2d');
+  // console.log('got image spec', img.width, img.height, img.naturalWidth, img.naturalHeight);
+  convertCanvas.width = img.naturalWidth;
+  convertCanvas.height = img.naturalHeight;
+  const ctx = convertCanvas.getContext('2d');
   ctx.drawImage(img, 0, 0);
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const imageData = ctx.getImageData(0, 0, convertCanvas.width, convertCanvas.height);
   return imageData;
 };
 const _getImageDataString = async u => {
@@ -52,18 +52,21 @@ const _getImageDataString = async u => {
   const htmlRenderer = new HtmlRenderer();
   console.log('wait for load');
   await htmlRenderer.waitForLoad();
-  console.log('render 1');
+  // console.log('render 1');
+  
+  console.time('render');
 
   const result = await (async () => {
+    console.time('render 1');
     const {s, doc} = await (async () => {
       const res = await fetch(testImgUrl);
       const s = await res.text();
       const doc = domParser.parseFromString(s, svgMimeType);
       return {s, doc};
     })();
-    window.s = s;
-    window.doc = doc;
+    console.timeEnd('render 1');
     
+    console.time('render 2');
     const creatorImageEl = doc.querySelector('#creator-image');
     const creatorImageData = await _getImageDataString(testUserImgUrl);
     // const oldUrl = creatorImageEl.getAttribute('xlink:href');
@@ -74,12 +77,18 @@ const _getImageDataString = async u => {
     const ownerImageData = await _getImageDataString(testUserImgUrl);
     // const oldUrl = creatorImageEl.getAttribute('xlink:href');
     ownerImageEl.setAttribute('xlink:href', ownerImageData);
+    console.timeEnd('render 2');
     
+    console.time('render 3');
     let s2 = xmlSerializer.serializeToString(doc);
+    console.timeEnd('render 3');
     
+    console.time('render 4');
     const stylePrefix = getDefaultStyles();
     s2 = s2.replace(/(<style)/, stylePrefix + '$1');
+    console.timeEnd('render 4');
     
+    console.time('render 5');
     const b = new Blob([
       s2,
     ], {
@@ -87,10 +96,12 @@ const _getImageDataString = async u => {
     });
     // console.log('load image 1', b);
     const img = await _loadImage(b);
-    // document.body.appendChild(img);
-    // console.log('load image 2', b, img);
+    console.timeEnd('render 5');
+    
+    console.time('render 6');
     const result = _imgToImageData(img);
-    console.log('got result', result);
+    console.timeEnd('render 6');
+    // console.log('got result', result);
     return result;
     
     /* const res = await fetch(testImgUrl);
@@ -100,6 +111,8 @@ const _getImageDataString = async u => {
     const result = _imgToImageData(img);
     return result; */
   })();
+  
+  console.timeEnd('render');
   
   const canvas = document.getElementById('canvas');
   canvas.width = result.width;
@@ -113,5 +126,5 @@ const _getImageDataString = async u => {
   imageData.data.set(result.data);
   ctx.putImageData(imageData, 0, 0);
   
-  console.log('render 2');
+  // console.log('render 2');
 })();
