@@ -5,7 +5,7 @@
     const {contentWindow} = iframe;
     const messageChannel = new MessageChannel();
     messageChannel.port2.addEventListener('message', e => {
-      console.log('got result', [e.data.error, e.data.result]);
+      console.log('got result', e.data.error, e.data.result);
       const {error, result} = e.data;
     });
     messageChannel.port2.start();
