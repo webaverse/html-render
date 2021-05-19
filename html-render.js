@@ -328,6 +328,7 @@ onCancel(() => {
       };
     })();
     console.timeEnd('render 1');
+    if (cancelled) return;
     
     console.time('render 2');
     const creatorImageEl = doc.querySelector('#creator-image');
@@ -354,6 +355,7 @@ onCancel(() => {
     });
     // console.log('load image 1', b);
     const img = await _loadImage(b);
+    if (cancelled) return;
     console.timeEnd('render 5');
     
     console.time('render 6');
