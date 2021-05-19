@@ -7,7 +7,7 @@ import HtmlRenderer from './html-render-api.js';
   await htmlRenderer.waitForLoad();
   console.log('render 1');
   const result = await htmlRenderer.render(`\
-    <h1>Lollercopter X</h1>
+    <h1 style="font-family: RobotoCondensed-Light;">Lollercopter X</h1>
   `);
   
   const canvas = document.getElementById('canvas');
