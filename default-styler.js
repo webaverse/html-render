@@ -1,3 +1,26 @@
+const fontFiles = [
+  /*'mem5YaGs126MiZpBA-UN_r8OUuhp.woff2',
+  'fa-brands-400.woff2',
+  'fa-duotone-900.woff2',
+  'fa-light-300.woff2',
+  'fa-regular-400.woff2',
+  'fa-solid-900.woff2',
+  'font-awesome.css', */
+  // 'Bangers-Regular.woff2',
+  // 'RobotoCondensed-Light.ttf',
+  'RobotoCondensed-Regular.ttf',
+];
+const cssFiles = [
+  /* 'open-sans.css',
+  'font-awesome.css', */
+  // 'bangers.css',
+  // 'robotocondensed-light.css',
+  'robotocondensed-regular.css',
+];
+const fontFileCache = {};
+const cssFileCache = {};
+let stylePrefix;
+
 const base64 = (function(){
   var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
@@ -59,29 +82,6 @@ const base64 = (function(){
     decode,
   };
 })();
-
-const fontFiles = [
-  /*'mem5YaGs126MiZpBA-UN_r8OUuhp.woff2',
-  'fa-brands-400.woff2',
-  'fa-duotone-900.woff2',
-  'fa-light-300.woff2',
-  'fa-regular-400.woff2',
-  'fa-solid-900.woff2',
-  'font-awesome.css', */
-  // 'Bangers-Regular.woff2',
-  'RobotoCondensed-Light.ttf',
-  'RobotoCondensed-Regular.ttf',
-];
-const cssFiles = [
-  /* 'open-sans.css',
-  'font-awesome.css', */
-  // 'bangers.css',
-  'robotocondensed-light.css',
-  'robotocondensed-regular.css',
-];
-const fontFileCache = {};
-const cssFileCache = {};
-let stylePrefix;
 
 const loadPromise = Promise.all(
   fontFiles.map(u =>
