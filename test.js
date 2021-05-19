@@ -8,6 +8,7 @@ import HtmlRenderer from './html-render-api.js';
   console.log('render 1');
   const result = await htmlRenderer.render(`\
     <h1 style="font-family: RobotoCondensed-Light;">Lollercopter X</h1>
+    <img src="https://app.webaverse.com/assets/popup3.svg">
   `);
   
   const canvas = document.getElementById('canvas');
