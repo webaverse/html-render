@@ -1,6 +1,7 @@
 import HtmlRenderer from './html-render-api.js';
 import {uint8ArrayToArrayBuffer} from './utils.js';
 
+const width = 600;
 const svgMimeType = 'image/svg+xml';
 const testImgUrl = 'https://127.0.0.1:3001/assets/popup3.svg'/*'https://app.webaverse.com/assets/popup3.svg'*/;
 const testUserImgUrl = `https://preview.exokit.org/[https://app.webaverse.com/assets/type/robot.glb]/preview.png?nocache=1`;
@@ -29,6 +30,7 @@ const _loadImage = b => new Promise((accept, reject) => {
 });
 const _imgToImageData = img => {
   const canvas = document.createElement('canvas');
+  console.log('got image spec', img.width, img.height, img.naturalWidth, img.naturalHeight);
   canvas.width = img.naturalWidth;
   canvas.height = img.naturalHeight;
   const ctx = canvas.getContext('2d');
@@ -84,6 +86,7 @@ const _imgToImageData = img => {
     // document.body.appendChild(img);
     // console.log('load image 2', b, img);
     const result = _imgToImageData(img);
+    console.log('got result', result);
     return result;
     
     /* const res = await fetch(testImgUrl);
@@ -97,6 +100,10 @@ const _imgToImageData = img => {
   const canvas = document.getElementById('canvas');
   canvas.width = result.width;
   canvas.height = result.height;
+  canvas.style.cssText = `\
+    width: ${result.width / window.devicePixelRatio}px;
+    width: ${result.height / window.devicePixelRatio}px;
+  `;
   const ctx = canvas.getContext('2d');
   const imageData = ctx.createImageData(result.width, result.height);
   imageData.data.set(result.data);
