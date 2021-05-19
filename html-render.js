@@ -109,6 +109,7 @@ const loadPromise = Promise.all(
 ).then(async () => {
   for (const k in cssFileCache) {
     let s = cssFileCache[k];
+    const ext = k.match(/\.([^\.]+)$/)[1];
 
     const regex = /(url\()([^\)]+)(\))/g;
     let match;
@@ -118,7 +119,7 @@ const loadPromise = Promise.all(
         // const arraybuffer = await res.arrayBuffer();
         // const b64 = base64.encode(arraybuffer);
         const b64 = fontFileCache[match[2]];
-        const inner = match[1] + '"data:font/woff;charset=utf-8;base64,' + b64 + '"' + match[3];
+        const inner = match[1] + `"data:font/${ext};charset=utf-8;base64,${b64}"` + match[3];
         s = s.slice(0, match.index) + inner + s.slice(match.index + match[0].length);
         regex.lastIndex = match.index + inner.length;
       /* } else {
