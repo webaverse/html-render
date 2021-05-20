@@ -5,7 +5,7 @@ class HtmlRenderer {
     iframe.style.cssText = `\
       position: absolute;
       top: -10000px;
-      left: -10000px;
+      /* left: -10000px; */
       visibility: hidden;
     `;
     this.iframe = iframe;
