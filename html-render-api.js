@@ -35,7 +35,7 @@ class HtmlRenderer {
     const messageChannel = new MessageChannel();
     const p = new Promise((accept, reject) => {
       messageChannel.port2.addEventListener('message', e => {
-        console.log('got result', e.data.error, e.data.result);
+        console.log('got render result', e.data.error, e.data.result);
         const {error, result} = e.data;
         if (!error) {
           accept(result);
@@ -90,7 +90,7 @@ class HtmlRenderer {
     const messageChannel = new MessageChannel();
     const p = new Promise((accept, reject) => {
       messageChannel.port2.addEventListener('message', e => {
-        console.log('got result', e.data.error, e.data.result);
+        console.log('got popup result', e.data.error, e.data.result);
         const {error, result} = e.data;
         if (!error) {
           accept(result);
