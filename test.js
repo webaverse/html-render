@@ -1,6 +1,6 @@
 import HtmlRenderer from './html-render-api.js';
 
-const testImgUrl = 'https://127.0.0.1:3001/assets/popup3.svg'/*'https://app.webaverse.com/assets/popup3.svg'*/;
+const testImgUrl = 'https://app.webaverse.com/assets/popup3.svg';
 const testUserImgUrl = `https://preview.exokit.org/[https://app.webaverse.com/assets/type/robot.glb]/preview.png?width=128&height=128`;
 
 (async () => {
