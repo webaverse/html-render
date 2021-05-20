@@ -444,15 +444,41 @@ onCancel(() => {
   try {
     const renderedHtmlString = `\
       <style>
-        body {
-          background-color: #00FF00;
+        .options {
+          display: flex;
+          flex-direction: column;
+          background-color: #111;
+          border-radius: 15px;
+          padding: 5px;
+        }
+        .options .option {
+          padding: 20px;
+          background-color: #333;
+          border-radius: 15px;
+          font-family: RobotoCondensed-Regular;
+          font-size: 30px;
+          color: #FFF;
+        }
+        .options .option + .option {
+          margin-top: 5px;
+        }
+        .options .option.selected {
+          background-color: #42a5f5;
+        }
+        .options .bar {
+          margin: 10px 0;
+          /* border-bottom: 2px solid #666; */
         }
       </style>
-      ${options.map(option => `
-        <a id=${option}>
-          <h1></h1>
-        </a>
-      `).join('\n')}
+      <div class="options">
+        ${options.map((option, i) => option ? `\
+          <a class="option ${i === 0 ? 'selected' : ''}" id=${option}>
+            <div id="${option}">${option}</div>
+          </a>
+        ` : `\
+          <div class="bar"></div>
+        `).join('\n')}
+      </div>
     `;
     const dom = new DOMParser().parseFromString(renderedHtmlString, 'text/html');
     const {head, body} = dom;
@@ -547,7 +573,7 @@ onCancel(() => {
         '<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'' + width + '\' height=\'' + height + '\'>' +
           stylePrefix + 
           styles.map(style => '<style>' + style + '</style>').join('') +
-          '<foreignObject width=\'100%\' height=\'100%\' x=\'0\' y=\'0\'' + (transparent ? '' : ' style=\'background-color: white;\'') + '>' +
+          '<foreignObject width=\'100%\' height=\'100%\' x=\'0\' y=\'0\'' + (transparent ? '' : ' style=\'background-color: red;\'') + '>' +
             new XMLSerializer().serializeToString(body) +
           '</foreignObject>' +
         '</svg>').replace(/#/g, '%23');
@@ -731,6 +757,8 @@ const _handleMessage = async data => {
         
         const localCurrentPromise = currentPromise = window.renderContextMenu(
           options,
+          width,
+          height,
         );
         localCurrentPromise.id = id;
         const o = await localCurrentPromise;
