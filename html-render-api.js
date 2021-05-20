@@ -130,6 +130,7 @@ class HtmlRenderer {
     width,
     height,
     options,
+    selectedOptionIndex,
   }) {
     const {contentWindow} = this.iframe;
     // console.log('render context menu', options);
@@ -158,6 +159,7 @@ class HtmlRenderer {
         width,
         height,
         options,
+        selectedOptionIndex,
         port,
       }, '*', [port]);
     }
