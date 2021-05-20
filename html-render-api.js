@@ -132,8 +132,7 @@ class HtmlRenderer {
     options,
   }) {
     const {contentWindow} = this.iframe;
-    
-    console.log('render context menu', options);
+    // console.log('render context menu', options);
     
     const messageChannel = new MessageChannel();
     const p = new Promise((accept, reject) => {
