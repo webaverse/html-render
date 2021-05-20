@@ -1,6 +1,4 @@
 import HtmlRenderer from './html-render-api.js';
-import {getDefaultStyles} from './default-styler.js';
-import {uint8ArrayToArrayBuffer} from './utils.js';
 
 // const width = 600;
 const testImgUrl = 'https://127.0.0.1:3001/assets/popup3.svg'/*'https://app.webaverse.com/assets/popup3.svg'*/;
