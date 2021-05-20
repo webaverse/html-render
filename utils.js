@@ -60,3 +60,18 @@ export function uint8ArrayToArrayBuffer(bytes) {
   
   return base64
 }
+
+export const escapeHtml = (() => {        
+  const tagsToReplace = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+  };
+  function replaceTag(tag) {
+    return tagsToReplace[tag] || tag;
+  }
+  function safe_tags_replace(str) {
+    return str.replace(/[&<>]/g, replaceTag);
+  }
+  return safe_tags_replace;
+})();
