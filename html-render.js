@@ -426,7 +426,7 @@ onCancel(() => {
 })()
   .then(accept, reject);
 });
-window.renderContextMenu = (options, width, height) => new PCancelable((accept, reject, onCancel) => {
+window.renderContextMenu = (options, selectedOptionIndex, width, height) => new PCancelable((accept, reject, onCancel) => {
 let cancelled = false;
 onCancel(() => {
   cancelled = true;
@@ -470,7 +470,7 @@ onCancel(() => {
       </style>
       <div class="options">
         ${options.map((option, i) => option ? `\
-          <a class="option ${i === 0 ? 'selected' : ''}" id=${option}>
+          <a class="option ${i === selectedOptionIndex ? 'selected' : ''}" id=${option}>
             <div id="${option}">${option}</div>
           </a>
         ` : `\
@@ -748,6 +748,7 @@ const _handleMessage = async data => {
         const {
           id,
           options,
+          selectedOptionIndex,
           width,
           height,
           port,
@@ -755,6 +756,7 @@ const _handleMessage = async data => {
         
         const localCurrentPromise = currentPromise = window.renderContextMenu(
           options,
+          selectedOptionIndex,
           width,
           height,
         );
