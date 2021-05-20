@@ -1,6 +1,5 @@
 import HtmlRenderer from './html-render-api.js';
 
-// const width = 600;
 const testImgUrl = 'https://127.0.0.1:3001/assets/popup3.svg'/*'https://app.webaverse.com/assets/popup3.svg'*/;
 const testUserImgUrl = `https://preview.exokit.org/[https://app.webaverse.com/assets/type/robot.glb]/preview.png?width=128&height=128`;
 
@@ -19,7 +18,6 @@ const testUserImgUrl = `https://preview.exokit.org/[https://app.webaverse.com/as
   console.log('got result', result);
   
   const canvas = document.getElementById('canvas');
-  console.log('got width', result);
   canvas.width = result.width;
   canvas.height = result.height;
   canvas.style.cssText = `\
