@@ -126,5 +126,45 @@ class HtmlRenderer {
     const result = await p;
     return result;
   }
+  async renderContextMenu({
+    width,
+    height,
+    options,
+  }) {
+    const {contentWindow} = this.iframe;
+    
+    console.log('render context menu', options);
+    
+    const messageChannel = new MessageChannel();
+    const p = new Promise((accept, reject) => {
+      messageChannel.port2.addEventListener('message', e => {
+        console.log('got contextmenu result', e.data.error, e.data.result);
+        const {error, result} = e.data;
+        if (!error) {
+          accept(result);
+        } else {
+          reject(error);
+        }
+      });
+    });
+    messageChannel.port2.start();
+    
+    {
+      const id = ++this.ids;
+      const port = messageChannel.port1;
+      // console.log('post render context menu');
+      contentWindow.postMessage({
+        method: 'renderContextMenu',
+        id,
+        width,
+        height,
+        options,
+        port,
+      }, '*', [port]);
+    }
+    
+    const result = await p;
+    return result;
+  }
 }
 export default HtmlRenderer;
