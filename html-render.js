@@ -428,11 +428,203 @@ onCancel(() => {
 })()
   .then(accept, reject);
 });
+window.renderContextMenu = (options, width, height) => new PCancelable((accept, reject, onCancel) => {
+let cancelled = false;
+onCancel(() => {
+  cancelled = true;
+});
+(async () => {
+  await waitForLoad();
+  if (cancelled) return;
+  
+  const stylePrefix = getDefaultStyles();
+  const transparent = true;
+
+  let error, result;
+  try {
+    const renderedHtmlString = `\
+      <style>
+        body {
+          background-color: #00FF00;
+        }
+      </style>
+      ${options.map(option => `
+        <a id=${option}>
+          <h1></h1>
+        </a>
+      `).join('\n')}
+    `;
+    const dom = new DOMParser().parseFromString(renderedHtmlString, 'text/html');
+    const {head, body} = dom;
+    const html = body.parentNode;
+    // console.log('got dom', html);
+
+    const styles = [];
+    Array.from(html.querySelectorAll('style')).forEach(style => {
+      styles.push(style.textContent);
+    });
+    /* await Promise.all(Array.from(html.querySelectorAll('link')).map(link => new Promise((accept, reject) => {
+      if (link.rel === 'stylesheet' && link.href) {
+        fetch(link.href)
+          .then(res => {
+            if (res.status >= 200 && res.status < 300) {
+              return res.text();
+            } else {
+              return Promise.reject(new Error(`invalid status code: ${res.status}`));
+            }
+          })
+          .then(async s => {
+            const regex = /(url\()([^\)]+)(\))/g;
+            let match;
+            while (match = regex.exec(s)) {
+              const res = await fetch(match[2]);
+              if (res.status >= 200 && res.status < 300) {
+                const arraybuffer = await res.arrayBuffer();
+                const b64 = base64.encode(arraybuffer);
+                const inner = match[1] + '"data:font/woff;charset=utf-8;base64,' + b64 + '"' + match[3];
+                s = s.slice(0, match.index) + inner + s.slice(match.index + match[0].length);
+                regex.lastIndex = match.index + inner.length;
+              } else {
+                return Promise.reject(new Error(`invalid status code: ${res.status}`));
+              }
+            }
+
+            // console.log('got style text', s);
+            // const style = document.createElement('style');
+            // style.textContent = s;
+            // console.log('got style', style);
+            styles.push(s);
+          })
+          .then(accept)
+          .catch(err => {
+            console.warn(err);
+            accept();
+          });
+      } else {
+        accept();
+      }
+    }))); */
+
+    /* Array.from(html.querySelectorAll('script')).forEach(script => {
+      script.parentNode.removeChild(script);
+    }); */
+
+    // console.log('got 2');
+
+    await Promise.all(
+      Array.from(html.querySelectorAll('img'))
+        .map(async img => {
+          const dataUrl = await _getImgDataUrl(img.src);
+          /* if (!dataUrl) {
+            console.warn('fail', img, img.src, dataUrl);
+            debugger;
+          } */
+
+          await new Promise((accept, reject) => {
+            const newImg = new Image();
+            newImg.setAttribute('class', img.getAttribute('class'));
+            newImg.onload = () => {
+              img.replaceWith(newImg);
+              accept();
+            };
+            newImg.onerror = err => {
+              console.warn(err);
+              accept();
+            };
+            newImg.src = dataUrl;
+          });
+        })
+    );
+    if (cancelled) return;
+
+    // console.log('got 3');
+
+    const o = await new Promise((accept, reject) => {
+      const start = Date.now();
+
+      const img = new Image();
+      img.src = ('data:image/svg+xml;charset=utf-8,' +
+        '<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'' + width + '\' height=\'' + height + '\'>' +
+          stylePrefix + 
+          styles.map(style => '<style>' + style + '</style>').join('') +
+          '<foreignObject width=\'100%\' height=\'100%\' x=\'0\' y=\'0\'' + (transparent ? '' : ' style=\'background-color: white;\'') + '>' +
+            new XMLSerializer().serializeToString(body) +
+          '</foreignObject>' +
+        '</svg>').replace(/#/g, '%23');
+      // .replace(/\n/g, '');
+      // console.log('got src', img.src);
+      // img.crossOrigin = 'Anonymous';
+      img.onload = async () => {
+        if (cancelled) return;
+
+        console.log('got img time', Date.now() - start);
+
+        const {naturalWidth: width, naturalHeight: height} = img;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+        const imageData = ctx.getImageData(0, 0, img.naturalWidth, img.naturalHeight);
+        const imageBitmap = await createImageBitmap(imageData);
+        /* (() => {
+          if (!bitmap) {
+            let {data} = imageData;
+            data = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
+            return Promise.resolve(data);
+          } else {
+            return createImageBitmap(imageData);
+          }
+        })().then(data => { */
+        if (cancelled) return;
+
+        document.head.appendChild(head);
+        document.body.appendChild(body);
+
+        const anchors = ['a', 'nav', 'input']
+          .flatMap(q => Array.from(body.querySelectorAll(q)))
+          .map(el => {
+            const {id, href, name} = el;
+            if (!id && !href) {
+              console.warn('anchor missing id or href', el);
+            }
+            const rect = JSON.parse(JSON.stringify(el.getBoundingClientRect()));
+            return Object.assign(rect, {id, href, name});
+          });
+
+        document.head.removeChild(head);
+        document.body.removeChild(body);
+
+        accept([null, {width, height, imageBitmap, anchors}]);
+        /* }, err => {
+          if (cancelled) return;
+
+          accept([err.stack, null]);
+        }); */
+      };
+      img.onerror = err => {
+        console.warn('img error', err);
+        accept([err.stack, null]);
+      };
+    });
+    if (cancelled) return;
+
+    // console.log('got 4', !!error, !!result);
+
+    error = o[0];
+    result = o[1];
+  } catch (err) {
+    error = err.stack;
+  }
+
+  return {error, result};
+})()
+  .then(accept, reject);
+});
 
 let currentPromise = null;
 const queue = [];
 const _handleMessage = async data => {
   const {method} = data;
+
+  console.log('method', JSON.stringify(method));
 
   switch (method) {
     case 'render': {
@@ -476,11 +668,10 @@ const _handleMessage = async data => {
       break;
     }
     case 'renderPopup': {
-      console.log('got renderPopup', data);
+      // console.log('got renderPopup', data);
       
       if (!currentPromise) {
         const {
-          method,
           id,
           name,
           tokenId,
@@ -514,6 +705,39 @@ const _handleMessage = async data => {
           const {error, result} = o;
           if (error || result) {
             port.postMessage({error, result}, [result]);
+          }
+
+          currentPromise = null;
+          if (queue.length > 0) {
+            _handleMessage(queue.shift());
+          }
+        }
+      } else {
+        queue.push(data);
+      }
+      break;
+    }
+    case 'renderContextMenu': {
+      console.log('got renderContextMenu', data);
+      
+      if (!currentPromise) {
+        const {
+          id,
+          options,
+          width,
+          height,
+          port,
+        } = data;
+        
+        const localCurrentPromise = currentPromise = window.renderContextMenu(
+          options,
+        );
+        localCurrentPromise.id = id;
+        const o = await localCurrentPromise;
+        if (localCurrentPromise === currentPromise) {
+          const {error, result} = o;
+          if (error || result) {
+            port.postMessage({error, result}, result ? [result.imageBitmap] : []);
           }
 
           currentPromise = null;
