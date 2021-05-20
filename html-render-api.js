@@ -1,7 +1,7 @@
 class HtmlRenderer {
   constructor() {
     const iframe = document.createElement('iframe');
-    iframe.src = 'https://127.0.0.1:2223'; // 'https://html-render.webaverse.com/';
+    iframe.src = 'https://html-render.webaverse.com/';
     iframe.style.cssText = `\
       position: absolute;
       top: -10000px;
