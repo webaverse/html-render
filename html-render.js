@@ -284,7 +284,18 @@ onCancel(() => {
 })()
   .then(accept, reject);
 });
-window.renderPopup = (imgUrl, minterAvatarUrl, ownerAvatarUrl) => new PCancelable((accept, reject, onCancel) => {
+window.renderPopup = (
+  name,
+  tokenId,
+  type,
+  hash,
+  description,
+  imgUrl,
+  minterUsername,
+  ownerUsername,
+  minterAvatarUrl,
+  ownerAvatarUrl,
+) => new PCancelable((accept, reject, onCancel) => {
 let cancelled = false;
 onCancel(() => {
   cancelled = true;
@@ -330,12 +341,6 @@ onCancel(() => {
     console.timeEnd('render 1');
     if (cancelled) return;
     
-    const username = 'avaer';
-    const id = '42';
-    const type = 'vrm';
-    let hash = 'Qmej4c9FDJLTeSFhopvjF1f3KBi43xAk2j6v8jrzPQ4iRG';
-    hash = hash.slice(0, 6) + '...' + hash.slice(-2);
-    const description = 'This is an awesome Synoptic on his first day in Webaverse This is an awesome Synoptic on his first day in Webaverse';
     const _splitLines = (s, lineSize = 40) => {
       const ls = [];
       for (let i = 0; i < s.length; i += lineSize) {
@@ -353,8 +358,8 @@ onCancel(() => {
     const leftEl = svg.querySelector('#left');
     
     const middleEl = svg.querySelector('#middle');
-    middleEl.childNodes[0].innerHTML = username;
-    middleEl.childNodes[1].innerHTML = id;
+    middleEl.childNodes[0].innerHTML = name;
+    middleEl.childNodes[1].innerHTML = tokenId;
     middleEl.childNodes[2].innerHTML = type;
     middleEl.childNodes[3].innerHTML = hash;
     
@@ -471,10 +476,38 @@ const _handleMessage = async data => {
       break;
     }
     case 'renderPopup': {
+      console.log('got renderPopup', data);
+      
       if (!currentPromise) {
-        const {id, imgUrl, minterAvatarUrl, ownerAvatarUrl, transaprent, port} = data;
+        const {
+          method,
+          id,
+          name,
+          tokenId,
+          type,
+          hash,
+          description,
+          imgUrl,
+          minterUsername,
+          ownerUsername,
+          minterAvatarUrl,
+          ownerAvatarUrl,
+          transparent,
+          port,
+        } = data;
         
-        const localCurrentPromise = currentPromise = window.renderPopup(imgUrl, minterAvatarUrl, ownerAvatarUrl);
+        const localCurrentPromise = currentPromise = window.renderPopup(
+          name,
+          tokenId,
+          type,
+          hash,
+          description,
+          imgUrl,
+          minterUsername,
+          ownerUsername,
+          minterAvatarUrl,
+          ownerAvatarUrl,
+        );
         localCurrentPromise.id = id;
         const o = await localCurrentPromise;
         if (localCurrentPromise === currentPromise) {

@@ -73,8 +73,13 @@ class HtmlRenderer {
     return result;
   }
   async renderPopup({
-    // width,
-    // height,
+    name,
+    tokenId,
+    type,
+    hash,
+    description,
+    minterUsername,
+    ownerUsername,
     imgUrl,
     minterAvatarUrl,
     ownerAvatarUrl,
@@ -98,18 +103,21 @@ class HtmlRenderer {
     
     {
       const id = ++this.ids;
-      // const width = canvas.width;
-      // const height = canvas.height;
       const port = messageChannel.port1;
       // console.log('post message 1');
       contentWindow.postMessage({
         method: 'renderPopup',
         id,
+        name,
+        tokenId,
+        type,
+        hash,
+        description,
         imgUrl,
+        minterUsername,
+        ownerUsername,
         minterAvatarUrl,
         ownerAvatarUrl,
-        // width,
-        // height,
         transparent,
         port,
       }, '*', [port]);
