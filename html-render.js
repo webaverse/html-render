@@ -2,7 +2,7 @@ import Mustache from './mustache.js';
 import {PCancelable} from './p-cancelable.js';
 import lruCache from './lru-cache.js';
 import {waitForLoad, getDefaultStyles} from './default-styler.js';
-import {uint8ArrayToArrayBuffer} from './utils.js';
+import {uint8ArrayToArrayBuffer, escapeHtml} from './utils.js';
 
 const svgMimeType = 'image/svg+xml';
 
@@ -330,15 +330,65 @@ onCancel(() => {
     console.timeEnd('render 1');
     if (cancelled) return;
     
+    const username = 'avaer';
+    const id = '42';
+    const type = 'vrm';
+    let hash = 'Qmej4c9FDJLTeSFhopvjF1f3KBi43xAk2j6v8jrzPQ4iRG';
+    hash = hash.slice(0, 10) + '...' + hash.slice(-4);
+    const description = 'This is an awesome Synoptic on his first day in Webaverse This is an awesome Synoptic on his first day in Webaverse';
+    const _splitLines = (s, lineSize = 40) => {
+      const ls = [];
+      for (let i = 0; i < s.length; i += lineSize) {
+        let l = s.slice(i, i + lineSize);
+        l = l.replace(/^\s+/, '').replace(/\s+$/, '');
+        ls.push(l);
+      }
+      return ls;      
+    };
+    
+    const svg = doc.childNodes[1];
+    document.body.appendChild(svg);
+    
+    const leftEl = svg.querySelector('#left');
+    leftEl.childNodes[0].innerHTML = 'name: ' + username;
+    leftEl.childNodes[1].innerHTML = 'id: ' + id;
+    leftEl.childNodes[2].innerHTML = 'type: ' + type;
+    leftEl.childNodes[3].innerHTML = 'hash: ' + hash;
+    
+    {
+      const textNode = leftEl.childNodes[5];
+      const bbox = textNode.getBBox();
+      textNode.parentNode.removeChild(textNode);
+      // leftEl.childNodes[5].innerHTML = _splitLines(description);
+      const descriptionLines = _splitLines(description);
+      console.log('got box', bbox, descriptionLines);
+      for (let i = 0; i < descriptionLines.length; i++) {
+        const s = descriptionLines[i];
+        const el = textNode.cloneNode();
+        console.log('got el', el, leftEl.childNodes.length);
+
+        el.innerHTML = escapeHtml(s);
+        const y = bbox.y + (i * bbox.height) + bbox.height;
+        console.log('got y', y, bbox.y, i, bbox.height);
+        el.setAttribute('x', bbox.height * 0.7);
+        el.setAttribute('y', y);
+        leftEl.appendChild(el);
+      }
+    }
+    const rightEl = svg.querySelector('#right');
+    rightEl.childNodes[1].innerHTML = 'noob';
+    rightEl.childNodes[3].innerHTML = 'toob';
+    
     console.time('render 2');
-    const creatorImageEl = doc.querySelector('#creator-image');
+    const creatorImageEl = svg.querySelector('#creator-image');
     creatorImageEl.setAttribute('xlink:href', minterImageData);
     
-    const ownerImageEl = doc.querySelector('#owner-image')
+    const ownerImageEl = svg.querySelector('#owner-image')
     ownerImageEl.setAttribute('xlink:href', ownerImageData);
     console.timeEnd('render 2');
     
     console.time('render 3');
+    doc.appendChild(svg);
     let s2 = xmlSerializer.serializeToString(doc);
     console.timeEnd('render 3');
     
@@ -362,6 +412,7 @@ onCancel(() => {
     result = await createImageBitmap(img);
     console.timeEnd('render 6');
   } catch (err) {
+    console.warn(err);
     error = err.stack;
   }
 
