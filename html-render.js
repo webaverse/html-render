@@ -334,7 +334,7 @@ onCancel(() => {
     const id = '42';
     const type = 'vrm';
     let hash = 'Qmej4c9FDJLTeSFhopvjF1f3KBi43xAk2j6v8jrzPQ4iRG';
-    hash = hash.slice(0, 10) + '...' + hash.slice(-4);
+    hash = hash.slice(0, 6) + '...' + hash.slice(-2);
     const description = 'This is an awesome Synoptic on his first day in Webaverse This is an awesome Synoptic on his first day in Webaverse';
     const _splitLines = (s, lineSize = 40) => {
       const ls = [];
@@ -349,30 +349,33 @@ onCancel(() => {
     const svg = doc.childNodes[1];
     document.body.appendChild(svg);
     
-    const leftEl = svg.querySelector('#left');
-    leftEl.childNodes[0].innerHTML = 'name: ' + username;
-    leftEl.childNodes[1].innerHTML = 'id: ' + id;
-    leftEl.childNodes[2].innerHTML = 'type: ' + type;
-    leftEl.childNodes[3].innerHTML = 'hash: ' + hash;
     
+    const leftEl = svg.querySelector('#left');
+    
+    const middleEl = svg.querySelector('#middle');
+    middleEl.childNodes[0].innerHTML = username;
+    middleEl.childNodes[1].innerHTML = id;
+    middleEl.childNodes[2].innerHTML = type;
+    middleEl.childNodes[3].innerHTML = hash;
+    
+    // console.log('got left el', leftEl);
     {
-      const textNode = leftEl.childNodes[5];
+      const textNode = middleEl.childNodes[4];
       const bbox = textNode.getBBox();
       textNode.parentNode.removeChild(textNode);
-      // leftEl.childNodes[5].innerHTML = _splitLines(description);
       const descriptionLines = _splitLines(description);
       console.log('got box', bbox, descriptionLines);
       for (let i = 0; i < descriptionLines.length; i++) {
         const s = descriptionLines[i];
         const el = textNode.cloneNode();
-        console.log('got el', el, leftEl.childNodes.length);
+        console.log('got el', el, middleEl.childNodes);
 
         el.innerHTML = escapeHtml(s);
         const y = bbox.y + (i * bbox.height) + bbox.height;
         console.log('got y', y, bbox.y, i, bbox.height);
-        el.setAttribute('x', bbox.height * 0.7);
+        // el.setAttribute('x', bbox.height * 0.7);
         el.setAttribute('y', y);
-        leftEl.appendChild(el);
+        middleEl.appendChild(el);
       }
     }
     const rightEl = svg.querySelector('#right');
