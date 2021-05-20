@@ -354,7 +354,6 @@ onCancel(() => {
     const svg = doc.childNodes[1];
     document.body.appendChild(svg);
     
-    
     const leftEl = svg.querySelector('#left');
     
     const middleEl = svg.querySelector('#middle');
