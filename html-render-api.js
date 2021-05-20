@@ -4,8 +4,8 @@ class HtmlRenderer {
     iframe.src = 'https://127.0.0.1:2223'; // 'https://html-render.webaverse.com/';
     iframe.style.cssText = `\
       position: absolute;
-      top: -10000;
-      left: -10000;
+      top: -10000px;
+      left: -10000px;
       visibility: hidden;
     `;
     this.iframe = iframe;
