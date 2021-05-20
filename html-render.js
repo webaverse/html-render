@@ -306,7 +306,7 @@ onCancel(() => {
 
   let error, result;
   try {    
-    console.time('render');
+    console.time('render 1');
 
     const {
       s,
@@ -368,16 +368,15 @@ onCancel(() => {
       const bbox = textNode.getBBox();
       textNode.parentNode.removeChild(textNode);
       const descriptionLines = _splitLines(description);
-      console.log('got box', bbox, descriptionLines);
+      // console.log('got box', bbox, descriptionLines);
       for (let i = 0; i < descriptionLines.length; i++) {
         const s = descriptionLines[i];
         const el = textNode.cloneNode();
-        console.log('got el', el, middleEl.childNodes);
+        // console.log('got el', el, middleEl.childNodes);
 
         el.innerHTML = escapeHtml(s);
         const y = bbox.y + (i * bbox.height) + bbox.height;
-        console.log('got y', y, bbox.y, i, bbox.height);
-        // el.setAttribute('x', bbox.height * 0.7);
+        // console.log('got y', y, bbox.y, i, bbox.height);
         el.setAttribute('y', y);
         middleEl.appendChild(el);
       }
