@@ -454,7 +454,7 @@ onCancel(() => {
           background-color: #333;
           border-radius: 15px;
           font-family: RobotoCondensed-Regular;
-          font-size: 30px;
+          font-size: 24px;
           color: #FFF;
         }
         .options .option + .option {
