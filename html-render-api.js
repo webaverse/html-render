@@ -1,7 +1,7 @@
 class HtmlRenderer {
   constructor() {
     const iframe = document.createElement('iframe');
-    iframe.src = 'https://html-render.webaverse.com/';
+    iframe.src = 'https://127.0.0.1:2223/';
     iframe.style.cssText = `\
       position: absolute;
       top: -10000px;
@@ -35,7 +35,7 @@ class HtmlRenderer {
     const messageChannel = new MessageChannel();
     const p = new Promise((accept, reject) => {
       messageChannel.port2.addEventListener('message', e => {
-        console.log('got render result', e.data.error, e.data.result);
+        // console.log('got render result', e.data.error, e.data.result);
         const {error, result} = e.data;
         if (!error) {
           accept(result);
@@ -90,7 +90,7 @@ class HtmlRenderer {
     const messageChannel = new MessageChannel();
     const p = new Promise((accept, reject) => {
       messageChannel.port2.addEventListener('message', e => {
-        console.log('got popup result', e.data.error, e.data.result);
+        // console.log('got popup result', e.data.error, e.data.result);
         const {error, result} = e.data;
         if (!error) {
           accept(result);
@@ -138,7 +138,7 @@ class HtmlRenderer {
     const messageChannel = new MessageChannel();
     const p = new Promise((accept, reject) => {
       messageChannel.port2.addEventListener('message', e => {
-        console.log('got contextmenu result', e.data.error, e.data.result);
+        // console.log('got contextmenu result', e.data.error, e.data.result);
         const {error, result} = e.data;
         if (!error) {
           accept(result);
