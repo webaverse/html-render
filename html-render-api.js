@@ -6,6 +6,8 @@ class HtmlRenderer {
       position: absolute;
       top: -10000px;
       /* left: -10000px; */
+      width: 4096px;
+      height: 4096px;
       visibility: hidden;
     `;
     this.iframe = iframe;
