@@ -742,7 +742,7 @@ const _handleMessage = async data => {
       break;
     }
     case 'renderContextMenu': {
-      console.log('got renderContextMenu', data);
+      // console.log('got renderContextMenu', data);
       
       if (!currentPromise) {
         const {
