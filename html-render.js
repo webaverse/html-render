@@ -300,13 +300,16 @@ let cancelled = false;
 onCancel(() => {
   cancelled = true;
 });
+const logTiming = false;
 (async () => {
   await waitForLoad();
   if (cancelled) return;
 
   let error, result;
-  try {    
-    console.time('render 1');
+  try {
+    if (logTiming) {
+      console.time('render 1');
+    }
 
     const {
       s,
@@ -338,7 +341,9 @@ onCancel(() => {
         ownerImageData,
       };
     })();
-    console.timeEnd('render 1');
+    if (logTiming) {
+      console.timeEnd('render 1');
+    }
     if (cancelled) return;
     
     const _splitLines = (s, lineSize = 40) => {
@@ -385,25 +390,39 @@ onCancel(() => {
     rightEl.childNodes[1].innerHTML = 'noob';
     rightEl.childNodes[3].innerHTML = 'toob';
     
-    console.time('render 2');
+    if (logTiming) {
+      console.time('render 2');
+    }
     const creatorImageEl = svg.querySelector('#creator-image');
     creatorImageEl.setAttribute('xlink:href', minterImageData);
     
     const ownerImageEl = svg.querySelector('#owner-image')
     ownerImageEl.setAttribute('xlink:href', ownerImageData);
-    console.timeEnd('render 2');
+    if (logTiming) {
+      console.timeEnd('render 2');
+    }
     
-    console.time('render 3');
+    if (logTiming) {
+      console.time('render 3');
+    }
     doc.appendChild(svg);
     let s2 = xmlSerializer.serializeToString(doc);
-    console.timeEnd('render 3');
+    if (logTiming) {
+      console.timeEnd('render 3');
+    }
     
-    console.time('render 4');
+    if (logTiming) {
+      console.time('render 4');
+    }
     const stylePrefix = getDefaultStyles();
     s2 = s2.replace(/(<style)/, stylePrefix + '$1');
-    console.timeEnd('render 4');
+    if (logTiming) {
+      console.timeEnd('render 4');
+    }
     
-    console.time('render 5');
+    if (logTiming) {
+      console.time('render 5');
+    }
     const b = new Blob([
       s2,
     ], {
@@ -412,11 +431,17 @@ onCancel(() => {
     // console.log('load image 1', b);
     const img = await _loadImage(b);
     if (cancelled) return;
-    console.timeEnd('render 5');
+    if (logTiming) {
+      console.timeEnd('render 5');
+    }
     
-    console.time('render 6');
+    if (logTiming) {
+      console.time('render 6');
+    }
     result = await createImageBitmap(img);
-    console.timeEnd('render 6');
+    if (logTiming) {
+      console.timeEnd('render 6');
+    }
   } catch (err) {
     console.warn(err);
     error = err.stack;
