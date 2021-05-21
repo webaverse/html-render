@@ -9,6 +9,7 @@ class HtmlRenderer {
       width: 4096px;
       height: 4096px;
       visibility: hidden;
+      overflow: hidden;
     `;
     this.iframe = iframe;
     document.body.appendChild(iframe);
