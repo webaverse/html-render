@@ -622,7 +622,7 @@ onCancel(() => {
         const {naturalWidth: width, naturalHeight: height} = img;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0);
-        const imageData = ctx.getImageData(0, 0, img.naturalWidth, img.naturalHeight);
+        const imageData = ctx.getImageData(0, 0, width, height);
         const imageBitmap = await createImageBitmap(imageData);
         /* (() => {
           if (!bitmap) {
