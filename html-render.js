@@ -465,33 +465,44 @@ onCancel(() => {
 
   let error, result;
   try {
+    const styleString = `\
+      body {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        flex-direction: column;
+      }
+      .options {
+        display: flex;
+        width: 100%;
+        flex-direction: column;
+        background-color: #111;
+        border-radius: 15px;
+        padding: 5px;
+        flex: 1;
+      }
+      .options .option {
+        padding: 20px;
+        background-color: #333;
+        border-radius: 15px;
+        font-family: RobotoCondensed-Regular;
+        font-size: 24px;
+        color: #FFF;
+      }
+      .options .option + .option {
+        margin-top: 5px;
+      }
+      .options .option.selected {
+        background-color: #42a5f5;
+      }
+      .options .bar {
+        margin: 10px 0;
+        /* border-bottom: 2px solid #666; */
+      }
+    `;
     const renderedHtmlString = `\
       <style>
-        .options {
-          display: flex;
-          flex-direction: column;
-          background-color: #111;
-          border-radius: 15px;
-          padding: 5px;
-        }
-        .options .option {
-          padding: 20px;
-          background-color: #333;
-          border-radius: 15px;
-          font-family: RobotoCondensed-Regular;
-          font-size: 24px;
-          color: #FFF;
-        }
-        .options .option + .option {
-          margin-top: 5px;
-        }
-        .options .option.selected {
-          background-color: #42a5f5;
-        }
-        .options .bar {
-          margin: 10px 0;
-          /* border-bottom: 2px solid #666; */
-        }
+        ${styleString}
       </style>
       <div class="options">
         ${options.map((option, i) => option ? `\
