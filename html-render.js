@@ -637,6 +637,8 @@ onCancel(() => {
 
         document.head.appendChild(head);
         document.body.appendChild(body);
+        document.body.style.width = `${width}px`;
+        document.body.style.height = `${height}px`;
 
         const anchors = ['a', 'nav', 'input']
           .flatMap(q => Array.from(body.querySelectorAll(q)))
