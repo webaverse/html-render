@@ -581,7 +581,7 @@ onCancel(() => {
       img.onload = async () => {
         if (cancelled) return;
 
-        console.log('got img time', Date.now() - start);
+        // console.log('got img time', Date.now() - start);
 
         const {naturalWidth: width, naturalHeight: height} = img;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -648,7 +648,7 @@ const queue = [];
 const _handleMessage = async data => {
   const {method} = data;
 
-  console.log('method', JSON.stringify(method));
+  // console.log('method', JSON.stringify(method));
 
   switch (method) {
     case 'render': {
