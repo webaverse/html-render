@@ -653,6 +653,8 @@ onCancel(() => {
 
         document.head.removeChild(head);
         document.body.removeChild(body);
+        document.body.style.width = null;
+        document.body.style.height = null;
 
         accept([null, {width, height, imageBitmap, anchors}]);
         /* }, err => {
