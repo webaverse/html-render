@@ -54,15 +54,19 @@ const _imgToImageData = img => {
   return imageData;
 };
 const _getImageDataString = async u => {
-  // console.time('lol 1 ' + u);
-  const res = await fetch(u);
-  const arrayBuffer = await res.arrayBuffer();
-  const uint8Array = new Uint8Array(arrayBuffer);
-  // console.timeEnd('lol 1 ' + u);
-  // console.time('lol 2 ' + u);
-  const s = `data:image/png;base64,` + uint8ArrayToArrayBuffer(uint8Array);
-  // console.timeEnd('lol 2 ' + u);
-  return s;
+  if (u) {
+    // console.time('lol 1 ' + u);
+    const res = await fetch(u);
+    const arrayBuffer = await res.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
+    // console.timeEnd('lol 1 ' + u);
+    // console.time('lol 2 ' + u);
+    const s = `data:image/png;base64,` + uint8ArrayToArrayBuffer(uint8Array);
+    // console.timeEnd('lol 2 ' + u);
+    return s;
+  } else {
+    return null;
+  }
 };
 
 const imgCache = new lruCache({
@@ -291,6 +295,7 @@ window.renderPopup = (
   hash,
   description,
   imgUrl,
+  previewUrl,
   minterUsername,
   ownerUsername,
   minterAvatarUrl,
@@ -314,6 +319,7 @@ const logTiming = false;
     const {
       s,
       doc,
+      previewImageData,
       minterImageData,
       ownerImageData,
     } = await (async () => {
@@ -322,6 +328,7 @@ const logTiming = false;
           s,
           doc,
         },
+        previewImageData,
         minterImageData,
         ownerImageData,
       ] = await Promise.all([
@@ -331,12 +338,14 @@ const logTiming = false;
           const doc = domParser.parseFromString(s, svgMimeType);
           return {s, doc};
         })(),
+        _getImageDataString(previewUrl),
         _getImageDataString(minterAvatarUrl),
         _getImageDataString(ownerAvatarUrl),
       ]);
       return {
         s,
         doc,
+        previewImageData,
         minterImageData,
         ownerImageData,
       };
@@ -359,24 +368,35 @@ const logTiming = false;
     const svg = doc.childNodes[1];
     document.body.appendChild(svg);
     
-    const leftEl = svg.querySelector('#left');
+    // const leftEl = svg.querySelector('#left');
     
-    const middleEl = svg.querySelector('#middle');
-    middleEl.childNodes[0].innerHTML = name;
-    middleEl.childNodes[1].innerHTML = tokenId;
-    middleEl.childNodes[2].innerHTML = type;
-    middleEl.childNodes[3].innerHTML = hash;
+    // const middleEl = svg.querySelector('#middle');
+    // console.log('got middle', middleEl);
+    const nameEl = svg.querySelector('#name-value');
+    const tokenIdEl = svg.querySelector('#id-value');
+    const typeEl = svg.querySelector('#type-value');
+    const hashEl = svg.querySelector('#hash-value');
+    const descriptionEl = svg.querySelector('#description-value');
+    const creatorLabelEl = svg.querySelector('#creator-label');
+    const creatorUsernameEl = svg.querySelector('#creator-value');
+    const ownerLabelEl = svg.querySelector('#owner-label');
+    const ownerUsernameEl = svg.querySelector('#owner-value');
+    const previewEl = svg.querySelector('#preview');
+    const middleEl = nameEl.parentNode;
+    nameEl.innerHTML = escapeHtml(name);
+    tokenIdEl.innerHTML = escapeHtml(tokenId + '');
+    typeEl.innerHTML = escapeHtml(type);
+    hashEl.innerHTML = escapeHtml(hash);
     
-    // console.log('got left el', leftEl);
+    // console.log('got preview el', previewEl);
     {
-      const textNode = middleEl.childNodes[4];
-      const bbox = textNode.getBBox();
-      textNode.parentNode.removeChild(textNode);
+      const bbox = descriptionEl.getBBox();
+      descriptionEl.parentNode.removeChild(descriptionEl);
       const descriptionLines = _splitLines(description);
       // console.log('got box', bbox, descriptionLines);
       for (let i = 0; i < descriptionLines.length; i++) {
         const s = descriptionLines[i];
-        const el = textNode.cloneNode();
+        const el = descriptionEl.cloneNode();
         // console.log('got el', el, middleEl.childNodes);
 
         el.innerHTML = escapeHtml(s);
@@ -386,27 +406,57 @@ const logTiming = false;
         middleEl.appendChild(el);
       }
     }
-    const rightEl = svg.querySelector('#right');
-    rightEl.childNodes[1].innerHTML = 'noob';
-    rightEl.childNodes[3].innerHTML = 'toob';
+    /* const rightEl = svg.querySelector('#right');
+    const [
+      creatorLabelEl,
+      creatorUsernameEl,
+      ownerLabelEl,
+      ownerUsernameEl,
+    ] = rightEl.childNodes; */
+    
+    if (minterUsername) {
+      creatorUsernameEl.innerHTML = escapeHtml(minterUsername);
+    } else {
+      creatorUsernameEl.parentNode.remove(creatorUsernameEl);
+    }
+    if (ownerUsername) {
+      ownerUsernameEl.innerHTML = escapeHtml(ownerUsername);
+    } else {
+      ownerUsernameEl.parentNode.remove(ownerUsernameEl);
+    }
     
     if (logTiming) {
       console.time('render 2');
     }
     const creatorImageEl = svg.querySelector('#creator-image');
-    creatorImageEl.setAttribute('xlink:href', minterImageData);
+    const creatorImageBg = svg.querySelector('#creator-image-bg');
+    const ownerImageEl = svg.querySelector('#owner-image');
+    const ownerImageBg = svg.querySelector('#owner-image-bg');
     
-    const ownerImageEl = svg.querySelector('#owner-image')
-    ownerImageEl.setAttribute('xlink:href', ownerImageData);
+    if (minterImageData) {
+      creatorImageEl.setAttribute('xlink:href', minterImageData);
+    } else {
+      creatorImageEl.parentNode.removeChild(creatorImageEl);
+      creatorImageBg.parentNode.removeChild(creatorImageBg);
+    }
+    if (ownerImageData) {
+      ownerImageEl.setAttribute('xlink:href', ownerImageData);
+    } else {
+      ownerImageEl.parentNode.removeChild(ownerImageEl);
+      ownerImageBg.parentNode.removeChild(ownerImageBg);
+    }
     if (logTiming) {
       console.timeEnd('render 2');
     }
-    
+
     if (logTiming) {
       console.time('render 3');
+    }    
+    if (previewImageData) {
+      ownerImageEl.setAttribute('xlink:href', previewImageData);
+    } else {
+      previewEl.parentNode.removeChild(previewEl);
     }
-    doc.appendChild(svg);
-    let s2 = xmlSerializer.serializeToString(doc);
     if (logTiming) {
       console.timeEnd('render 3');
     }
@@ -414,14 +464,23 @@ const logTiming = false;
     if (logTiming) {
       console.time('render 4');
     }
-    const stylePrefix = getDefaultStyles();
-    s2 = s2.replace(/(<style)/, stylePrefix + '$1');
+    doc.appendChild(svg);
+    let s2 = xmlSerializer.serializeToString(doc);
     if (logTiming) {
       console.timeEnd('render 4');
     }
     
     if (logTiming) {
       console.time('render 5');
+    }
+    const stylePrefix = getDefaultStyles();
+    s2 = s2.replace(/(<style)/, stylePrefix + '$1');
+    if (logTiming) {
+      console.timeEnd('render 5');
+    }
+    
+    if (logTiming) {
+      console.time('render 6');
     }
     const b = new Blob([
       s2,
@@ -432,15 +491,15 @@ const logTiming = false;
     const img = await _loadImage(b);
     if (cancelled) return;
     if (logTiming) {
-      console.timeEnd('render 5');
+      console.timeEnd('render 6');
     }
     
     if (logTiming) {
-      console.time('render 6');
+      console.time('render 7');
     }
     result = await createImageBitmap(img);
     if (logTiming) {
-      console.timeEnd('render 6');
+      console.timeEnd('render 7');
     }
   } catch (err) {
     console.warn(err);
@@ -451,7 +510,12 @@ const logTiming = false;
 })()
   .then(accept, reject);
 });
-window.renderContextMenu = (options, selectedOptionIndex, width, height) => new PCancelable((accept, reject, onCancel) => {
+window.renderContextMenu = (
+  options,
+  selectedOptionIndex,
+  width,
+  height,
+) => new PCancelable((accept, reject, onCancel) => {
 let cancelled = false;
 onCancel(() => {
   cancelled = true;
@@ -743,6 +807,7 @@ const _handleMessage = async data => {
           hash,
           description,
           imgUrl,
+          previewUrl,
           minterUsername,
           ownerUsername,
           minterAvatarUrl,
@@ -758,6 +823,7 @@ const _handleMessage = async data => {
           hash,
           description,
           imgUrl,
+          previewUrl,
           minterUsername,
           ownerUsername,
           minterAvatarUrl,
