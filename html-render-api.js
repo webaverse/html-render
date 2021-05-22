@@ -81,11 +81,12 @@ class HtmlRenderer {
     type,
     hash,
     description,
+    previewUrl,
     minterUsername,
     ownerUsername,
-    imgUrl,
     minterAvatarUrl,
     ownerAvatarUrl,
+    imgUrl,
     transparent,
   }) {
     const {contentWindow} = this.iframe;
@@ -115,12 +116,13 @@ class HtmlRenderer {
         tokenId,
         type,
         hash,
+        previewUrl,
         description,
-        imgUrl,
         minterUsername,
         ownerUsername,
         minterAvatarUrl,
         ownerAvatarUrl,
+        imgUrl,
         transparent,
         port,
       }, '*', [port]);

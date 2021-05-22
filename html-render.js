@@ -294,12 +294,12 @@ window.renderPopup = (
   type,
   hash,
   description,
-  imgUrl,
   previewUrl,
   minterUsername,
   ownerUsername,
   minterAvatarUrl,
   ownerAvatarUrl,
+  imgUrl,
 ) => new PCancelable((accept, reject, onCancel) => {
 let cancelled = false;
 onCancel(() => {
@@ -806,12 +806,12 @@ const _handleMessage = async data => {
           type,
           hash,
           description,
-          imgUrl,
           previewUrl,
           minterUsername,
           ownerUsername,
           minterAvatarUrl,
           ownerAvatarUrl,
+          imgUrl,
           transparent,
           port,
         } = data;
@@ -822,12 +822,12 @@ const _handleMessage = async data => {
           type,
           hash,
           description,
-          imgUrl,
           previewUrl,
           minterUsername,
           ownerUsername,
           minterAvatarUrl,
           ownerAvatarUrl,
+          imgUrl,
         );
         localCurrentPromise.id = id;
         const o = await localCurrentPromise;
