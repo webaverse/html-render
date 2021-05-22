@@ -453,7 +453,7 @@ const logTiming = false;
       console.time('render 3');
     }    
     if (previewImageData) {
-      ownerImageEl.setAttribute('xlink:href', previewImageData);
+      previewEl.setAttribute('xlink:href', previewImageData);
     } else {
       previewEl.parentNode.removeChild(previewEl);
     }
