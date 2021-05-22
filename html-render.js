@@ -417,12 +417,14 @@ const logTiming = false;
     if (minterUsername) {
       creatorUsernameEl.innerHTML = escapeHtml(minterUsername);
     } else {
-      creatorUsernameEl.parentNode.remove(creatorUsernameEl);
+      creatorUsernameEl.parentNode.removeChild(creatorUsernameEl);
+      creatorLabelEl.parentNode.removeChild(creatorLabelEl);
     }
     if (ownerUsername) {
       ownerUsernameEl.innerHTML = escapeHtml(ownerUsername);
     } else {
-      ownerUsernameEl.parentNode.remove(ownerUsernameEl);
+      ownerUsernameEl.parentNode.removeChild(ownerUsernameEl);
+      ownerLabelEl.parentNode.removeChild(ownerLabelEl);
     }
     
     if (logTiming) {
